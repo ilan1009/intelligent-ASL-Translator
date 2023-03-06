@@ -1,6 +1,8 @@
 from processInput import *
 from crawl import *
 from makevideo import *
+from time import sleep
+from tqdm import tqdm
 
 class Main:
     inputted_text = receiveInput()
@@ -13,13 +15,12 @@ class Main:
         pass
 
     i = 1
-    for word in processed_text:
+    for word in tqdm(processed_text):
         try:
             findWord(word, driver)
             getVideo(word, inputted_text, i, driver)
             i += 1
         except TimeoutException:
-            print(f"skipped word {word}, couldnt be found")
-    
+            print(f"skipped word {word}, couldnt be found", end=" ")
+
     vidfile = mergeVids(inputted_text, 1)
-    # playVid(vidfile)
