@@ -2,12 +2,13 @@ from os import listdir
 from moviepy.editor import *
 import tkinter as tk
 from tkVideoPlayer import TkinterVideo
+from tqdm import tqdm
 
 def mergeVids(foldername, speed):
-    clipnames = listdir(foldername)
+    clipnames = tqdm(listdir(foldername), unit="clip")
     clips = []
     for clipname in clipnames:
-        print("Adding " + clipname)
+        clipnames.message = "Merging " + clipname
         clip = VideoFileClip(foldername +"/" + clipname)
         clip.resize(width=800)
         clip = clip.subclip(0.2, clip.duration - 0.2)  #trim .2 off the edges
@@ -16,8 +17,8 @@ def mergeVids(foldername, speed):
     final = concatenate_videoclips(clips, method="compose")
 
     if speed != 1:
-        final = clip.fx( vfx.speedx, factor=speed)
-    final.write_videofile(foldername+"/merged.mp4")
+        final = final.fx( vfx.speedx, factor=speed)
+    final.write_videofile(foldername+"/merged.mp4", verbose=False, logger=None)
 
     return foldername+"/merged.mp4"
 

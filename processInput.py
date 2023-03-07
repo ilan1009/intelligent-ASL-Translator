@@ -2,8 +2,9 @@ import re
 
 
 def receiveInput():
-    input_request = input("I will try my best to help you translate a sentence to ASL. Please input below your request:\n")
-    return input_request
+    input_request = input("Please input below your request:\n")
+    foldername = input("Desired folder name? Duplicates not recommended: ")
+    return input_request, foldername
 
 def processInput(request):
     text = re.sub(r'[^\w\s]', '', request)
@@ -15,7 +16,9 @@ def processInput(request):
         "dont": "do_not",
         "i": "I_(me)", 
         "mom": "mother",
-        "dad": "father"
+        "dad": "father",
+        "mister": "Ms._/_Mr.",
+        "lonely": "lonely,_lone"
     }
 
     # Translate according to filter
