@@ -11,7 +11,6 @@ def mergeVids(foldername, speed):
         clipnames.message = "Merging " + clipname
         clip = VideoFileClip(foldername +"/" + clipname)
         clip.resize(width=800)
-        clip = clip.subclip(0.2, clip.duration - 0.2)  #trim .2 off the edges
         clips.append(clip)  # add to list of clips
 
     final = concatenate_videoclips(clips, method="compose")

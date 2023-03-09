@@ -10,6 +10,22 @@ from os import mkdir
 from selenium.common.exceptions import StaleElementReferenceException
 import urllib.request
 import re
+from webdriver_manager.chrome import ChromeDriverManager
+import time
+import traceback
+
+nums = {
+    "0": "zero",
+    "1": "one",
+    "2": "two",
+    "3": "three (3)",
+    "4": "four (4)",
+    "5": "five (5)",
+    "6": "six (6)",
+    "7": "seven (7)",
+    "8": "eight (8)",
+    "9": "nine (9)"
+    }
 
 def startDriver():
     options = Options()
@@ -23,66 +39,76 @@ def startDriver():
     caps = DesiredCapabilities().CHROME
     caps["pageLoadStrategy"] = "eager"  #  interactive
 
-    driver = webdriver.Chrome('./chromedriver.exe', chrome_options=options, desired_capabilities=caps)
+    driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options, desired_capabilities=caps)
     return driver
 
-
-def findWord(word, driver):
+def clickItem(elementLocator, driver):
     try:
-        driver.get("https://handspeak.com/word/")\
-        # Wait for search bar to appear
-        search_box_locator = (By.ID, "search_box")
-        search_box = WebDriverWait(driver, 5).until(EC.presence_of_element_located(search_box_locator))
+        element = WebDriverWait(driver, 5).until(EC.element_to_be_clickable(elementLocator))
+        element.click()
+    except (TimeoutException, StaleElementReferenceException) as exception:
+        print(exception)
+        element = WebDriverWait(driver, 5).until(EC.element_to_be_clickable(elementLocator))
+        element.click()
 
+def findSearchBox(driver):
+    driver.get("https://handspeak.com/word/")
+    search_box_locator = (By.ID, "search_box")
+    search_box = WebDriverWait(driver, 20).until(EC.presence_of_element_located(search_box_locator))
+    return search_box;
+
+def findWord(word, search_box, driver):
+    try:
         # Clear search bar and enter search term
         search_box.clear()
         search_box.send_keys(word)
 
 
-
-        # Click on first letter of search term
+        
         first_letter_locator = (By.XPATH, '//a[text()="'+word[0].upper()+'"]')
-        first_letter = WebDriverWait(driver, 10).until(EC.element_to_be_clickable(first_letter_locator))
-        first_letter.click()
-        first_letter.click()
+        clickItem(first_letter_locator, driver)
 
-
-        try:
-            word_locator = (By.XPATH, "//a[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') = '"+word.lower()+"']")
-            selected_word = WebDriverWait(driver, 10).until(EC.element_to_be_clickable(word_locator))
-            selected_word.click()
-        except StaleElementReferenceException:
-            word_locator = (By.XPATH, "//a[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') = '"+word.lower()+"']")
-            selected_word = WebDriverWait(driver, 10).until(EC.element_to_be_clickable(word_locator))
-            selected_word.click()
-    except:
+        time.sleep(0.5)
+        word_locator = (By.XPATH, '//a[translate(text(), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") = "'+word.lower()+'"]')
+        clickItem(word_locator, driver)
+    except Exception:
+        print(traceback.format_exc())
         return 0
 
-def findLetters(letter, driver):
+def findLetters(letter, search_box, driver):
     try:
-        driver.get("https://handspeak.com/word/")
-        search_box_locator = (By.ID, "search_box")
-        search_box = WebDriverWait(driver, 5).until(EC.presence_of_element_located(search_box_locator))
-
-        
         search_box.clear()
-        search_box.send_keys(letter)
-        
-        first_letter_locator = (By.XPATH, '//a[contains(@class, "abc-btn") and text()="'+letter.upper()+'"]')
-        first_letter = WebDriverWait(driver, 10).until(EC.element_to_be_clickable(first_letter_locator))
-        first_letter.click()
-        first_letter.click()
 
-        # Click on search term in list of words
-        word_locator = (By.XPATH, "//a[contains(@title, 'Click on this link for') and text()='"+letter.upper()+"']")
-        selected_word = WebDriverWait(driver, 5).until(EC.element_to_be_clickable(word_locator))
-        selected_word.click()
-    except:
+        if letter.isnumeric():
+            letter = nums[str(letter)]
+            findNumber(letter, search_box, driver)
+            return "checking num"
+
+        search_box.send_keys(letter)
+
+        time.sleep(0.5)
+        first_letter_locator = (By.XPATH, '//a[contains(@class, "abc-btn") and text()="'+letter.upper()+'"]')
+        clickItem(first_letter_locator, driver)
+
+        word_locator = (By.XPATH, '//a[contains(@title, "Click on this link for") and text()="'+letter.upper()+'"]')
+        clickItem(word_locator, driver)
+
+    except Exception as e:
+        print(e)
         return 0
+
+def findNumber(numberstr, search_box, driver):
+    search_box.send_keys(numberstr)
+    print(numberstr)
+
+    xpath = f'//a[text()="{numberstr}"]'
+    number_locator = (By.XPATH, xpath)
+    clickItem(number_locator, driver)
+
 
 def getVideo(word, foldername, index, driver):
     element_present = EC.presence_of_element_located((By.CLASS_NAME, "v-asl"))
-    WebDriverWait(driver, 5).until(element_present)
+    WebDriverWait(driver, 20).until(element_present)
 
     video = driver.find_element("class name", "v-asl")
 
@@ -92,9 +118,9 @@ def getVideo(word, foldername, index, driver):
 
     urllib.request.urlretrieve(video_url, filename)  
 
-# driver = startDriver()
-# j = 1
-# for i in ["i", "l", "a", "n"]:
-#     findLetters(i, driver)
-#     getVideo(i + "_letter", 'amogus', j, driver)
-#     # j+=1
+"""driver = startDriver()
+j = 1
+for i in ["6", "8", "7", "5"]:
+    findLetters(i, driver)
+    getVideo(i + "_letter", 'videos/amongusporn69', j, driver)
+    j+=1"""

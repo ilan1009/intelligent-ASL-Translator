@@ -13,7 +13,7 @@ def processInput(request):
 
     blacklist = ['is']
     filterwords = {
-        "dont": "do_not",
+        "dont": "do_not_(don't)",
         "i": "I_(me)", 
         "mom": "mother",
         "dad": "father",
