@@ -41,7 +41,7 @@ for word in progress_bar:
         getVideo(word, foldername, i, driver)
         i += 1
     else:
-        for letter in tqdm(word, unit="letter", desc="getting letters for unknown word"):
+        for letter in tqdm(word, unit="letter", desc="Getting letters of " + word):
             search_box = findSearchBox(driver)
             findLetters(letter, search_box, driver)
             getVideo(letter + "_letter", foldername, i, driver)

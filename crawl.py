@@ -37,6 +37,7 @@ def startDriver():
     "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
+    options.add_argument('--headless') #  testing
 
     caps = DesiredCapabilities().CHROME
     caps["pageLoadStrategy"] = "eager"  #  interactive
@@ -48,21 +49,17 @@ class ElementClickException(Exception):
     pass
 
 def clickItem(elementLocator, driver):
-    exception = None
     try:
         element = WebDriverWait(driver, 5).until(EC.element_to_be_clickable(elementLocator))
         element.click()
     except (TimeoutException, StaleElementReferenceException) as exception:
-        print(exception)
         for i in range(2):
             try:
                 element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable(elementLocator))
                 element.click()
                 break
             except StaleElementReferenceException as exception:
-                print(exception)
-        else:
-            raise exception  # If the exception is not caught in the for loop, raise it
+                pass
     except Exception as exception:
         raise ElementClickException("An error occurred while clicking the element") from exception
 
@@ -108,7 +105,6 @@ def findLetters(letter, search_box, driver):
         clickItem(word_locator, driver)
 
     except Exception as e:
-        print(e)
         return 0
 
 def findNumber(numberstr, search_box, driver):
