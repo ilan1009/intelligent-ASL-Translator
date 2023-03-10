@@ -110,7 +110,6 @@ def findLetters(letter, search_box, driver):
 def findNumber(numberstr, search_box, driver):
     search_box.send_keys(numberstr)
     time.sleep(0.5)
-    print(numberstr)
 
     if numberstr[0].isalpha():
         first_letter_locator = (By.XPATH, '//a[text()="'+numberstr[0].upper()+'"]')
@@ -124,7 +123,7 @@ def findNumber(numberstr, search_box, driver):
 
 def getVideo(word, foldername, index, driver):
     element_present = EC.presence_of_element_located((By.CLASS_NAME, "v-asl"))
-    WebDriverWait(driver, 20).until(element_present)
+    WebDriverWait(driver, 50).until(element_present)
 
     video = driver.find_element("class name", "v-asl")
 
