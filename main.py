@@ -1,40 +1,52 @@
+import sys
 from processInput import *
 from crawl import *
 from makevideo import *
 from tqdm import tqdm
+from args_handler import parse_arguments
 
-class Main:
-    x = receiveInput()  # Recieve user input, text and folder name
-    inputted_text = x[0]  # Initialize text requested
-    foldername = "videos/" + x[1]  # Folder name
+args = parse_arguments()
 
-    processed_text = processInput(inputted_text)  #"Pre process" text to find out ambiguous words, filter and translate words.
-    
-    driver = startDriver()  # Init driver
+if args['interactive']:
+    x = receiveInput()
+    inputted_text = x[0]
+    foldername = x[1]
+else:
+    inputted_text = args['input_text']
+    foldername = args['foldername']
 
-    try:
-        mkdir(foldername)
-    except:
-        pass
+speed = float(args['speed'])
 
-    i = 1
-    # Progress bar using tqdm
-    progress_bar = tqdm(processed_text, unit="word")
-    for word in progress_bar:
-        progress_bar.set_description("Getting word %s" % word)  # Display which word we're using
+foldername = 'videos/' + foldername
+processed_text = processInput(inputted_text)
 
-        search_box = findSearchBox(driver)
-        if findWord(word, search_box, driver) != 0:  # If the word was found properly, get it normally
-            getVideo(word, foldername, i, driver)
+driver = startDriver()
+
+try:
+    mkdir(foldername)
+except:
+    pass
+
+i = 1
+progress_bar = tqdm(processed_text, unit="word")
+for word in progress_bar:
+    progress_bar.set_description("Getting word %s" % word)
+
+    search_box = findSearchBox(driver)
+    if len(word) == 1:
+        findLetters(word, search_box, driver)
+        getVideo(word + "_letter", foldername, i, driver)
+        i += 1
+    elif findWord(word, search_box, driver) != 0:
+        getVideo(word, foldername, i, driver)
+        i += 1
+    else:
+        for letter in tqdm(word, unit="letter", desc="getting letters for unknown word"):
+            search_box = findSearchBox(driver)
+            findLetters(letter, search_box, driver)
+            getVideo(letter + "_letter", foldername, i, driver)
             i += 1
-        else:  # Else, get each letter manually
-            for letter in tqdm(word, unit="letter", desc="getting letters for unknown word"):
-                search_box = findSearchBox(driver)
-                findLetters(letter, search_box, driver)
-                getVideo(letter + "_letter", foldername, i, driver)  # Add "_letter" suffix for each video of a letter being signed
-                i += 1
 
-    response = "y"  # You could ignore this.
-    if response.lower() == "y":
-        speed = float(input("Select speed for the merged video (Default speed (1) may be slow): " or 1))
-        vidfile = mergeVids(foldername, speed)
+if args['speed'] == None:
+    speed = float(input("Select speed for the merged video (Default speed (1) may be slow): " or 1))
+vidfile = mergeVids(foldername, speed)

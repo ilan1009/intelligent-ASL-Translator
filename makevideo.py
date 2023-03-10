@@ -5,7 +5,7 @@ from tkVideoPlayer import TkinterVideo
 from tqdm import tqdm
 
 def mergeVids(foldername, speed):
-    clipnames = tqdm(listdir(foldername), unit="clip")
+    clipnames = tqdm(sorted(listdir(foldername)), unit="clip")  # sort clip names by file name
     clips = []
     for clipname in clipnames:
         clipnames.message = "Merging " + clipname
@@ -32,3 +32,4 @@ def playVid(finalvid):
     videoplayer.play() # play the video
 
     root.mainloop()
+

@@ -13,14 +13,16 @@ import re
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 import traceback
+import string
+
 
 nums = {
-    "0": "zero",
+    "0": "zero (0)",
     "1": "one",
     "2": "two",
-    "3": "three (3)",
-    "4": "four (4)",
-    "5": "five (5)",
+    "3": "three",
+    "4": "four",
+    "5": "five",
     "6": "six (6)",
     "7": "seven (7)",
     "8": "eight (8)",
@@ -42,14 +44,28 @@ def startDriver():
     driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options, desired_capabilities=caps)
     return driver
 
+class ElementClickException(Exception):
+    pass
+
 def clickItem(elementLocator, driver):
+    exception = None
     try:
         element = WebDriverWait(driver, 5).until(EC.element_to_be_clickable(elementLocator))
         element.click()
     except (TimeoutException, StaleElementReferenceException) as exception:
         print(exception)
-        element = WebDriverWait(driver, 5).until(EC.element_to_be_clickable(elementLocator))
-        element.click()
+        for i in range(2):
+            try:
+                element = WebDriverWait(driver, 1).until(EC.element_to_be_clickable(elementLocator))
+                element.click()
+                break
+            except StaleElementReferenceException as exception:
+                print(exception)
+        else:
+            raise exception  # If the exception is not caught in the for loop, raise it
+    except Exception as exception:
+        raise ElementClickException("An error occurred while clicking the element") from exception
+
 
 def findSearchBox(driver):
     driver.get("https://handspeak.com/word/")
@@ -64,15 +80,13 @@ def findWord(word, search_box, driver):
         search_box.send_keys(word)
 
 
-        
+        time.sleep(0.5)
         first_letter_locator = (By.XPATH, '//a[text()="'+word[0].upper()+'"]')
         clickItem(first_letter_locator, driver)
 
-        time.sleep(0.5)
         word_locator = (By.XPATH, '//a[translate(text(), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") = "'+word.lower()+'"]')
         clickItem(word_locator, driver)
-    except Exception:
-        print(traceback.format_exc())
+    except TimeoutException:
         return 0
 
 def findLetters(letter, search_box, driver):
@@ -99,8 +113,14 @@ def findLetters(letter, search_box, driver):
 
 def findNumber(numberstr, search_box, driver):
     search_box.send_keys(numberstr)
+    time.sleep(0.5)
     print(numberstr)
 
+    if numberstr[0].isalpha():
+        first_letter_locator = (By.XPATH, '//a[text()="'+numberstr[0].upper()+'"]')
+        clickItem(first_letter_locator, driver)
+        time.sleep(0.5)
+    
     xpath = f'//a[text()="{numberstr}"]'
     number_locator = (By.XPATH, xpath)
     clickItem(number_locator, driver)
