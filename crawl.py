@@ -86,7 +86,7 @@ def findWord(word, search_box, driver):
     except TimeoutException:
         return 0
 
-def findLetters(letter, search_box, driver):
+def findLetter(letter, search_box, driver):
     try:
         search_box.clear()
 
@@ -129,13 +129,8 @@ def getVideo(word, foldername, index, driver):
 
     video_url = video.get_property('src')
 
+    index = "{:03d}".format(index)
+
     filename = f"{foldername}/{index}_" + re.sub(r'[^\w\s]', '', word) + ".mp4"
 
     urllib.request.urlretrieve(video_url, filename)  
-
-"""driver = startDriver()
-j = 1
-for i in ["6", "8", "7", "5"]:
-    findLetters(i, driver)
-    getVideo(i + "_letter", 'videos/amongusporn69', j, driver)
-    j+=1"""

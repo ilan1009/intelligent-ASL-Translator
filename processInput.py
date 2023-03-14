@@ -7,17 +7,20 @@ def receiveInput():
     return input_request, foldername
 
 def processInput(request):
-    text = re.sub(r'[^\w\s]', '', request)
+    text = re.sub(r'[^\w\s-]', '', request)
     print(text)
 
 
-    blacklist = ['is']
+    blacklist = ['is', 'of', 'it', 'to']
     filterwords = {
         "dont": "do_not_(don't)",
         "mom": "mother",
         "dad": "father",
         "mister": "Ms._/_Mr.",
         "lonely": "lonely,_lone"
+        "your", "yo": "you",
+        "he": "him",
+        "her": "she"
     }
 
     # Translate according to filter

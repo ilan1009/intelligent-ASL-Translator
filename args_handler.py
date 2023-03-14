@@ -7,6 +7,8 @@ def parse_arguments():
     parser.add_argument('-f', '--file', metavar='input_file', type=str, help='input text file')
     parser.add_argument('-o', '--output', metavar='foldername', type=str, help='name of folder to store output')
     parser.add_argument('-s', '--speed', metavar='speed', type=float, help='speed of rendered output video')
+    parser.add_argument('-hm', '--headlessmode', metavar='headless', action='store_true', help='speed of rendered output video')
+
 
     args = parser.parse_args()
     speed = args.speed

@@ -27,25 +27,26 @@ try:
 except:
     pass
 
-i = 1
 progress_bar = tqdm(processed_text, unit="word")
+i=0
 for word in progress_bar:
     progress_bar.set_description("Getting word %s" % word)
 
     search_box = findSearchBox(driver)
     if len(word) == 1:
-        findLetters(word, search_box, driver)
+        findLetter(word, search_box, driver)
         getVideo(word + "_letter", foldername, i, driver)
-        i += 1
+        i+=1
     elif findWord(word, search_box, driver) != 0:
         getVideo(word, foldername, i, driver)
-        i += 1
+        i+=1
     else:
         for letter in tqdm(word, unit="letter", desc="Getting letters of " + word):
             search_box = findSearchBox(driver)
-            findLetters(letter, search_box, driver)
+            findLetter(letter, search_box, driver)
             getVideo(letter + "_letter", foldername, i, driver)
-            i += 1
+            i+=1
+
 
 if args['speed'] == None:
     speed = float(input("Select speed for the merged video (Default speed (1) may be slow): " or 1))

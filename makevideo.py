@@ -3,13 +3,16 @@ from moviepy.editor import *
 import tkinter as tk
 from tkVideoPlayer import TkinterVideo
 from tqdm import tqdm
+import glob
 
 def mergeVids(foldername, speed):
-    clipnames = tqdm(sorted(listdir(foldername)), unit="clip")  # sort clip names by file name
+    glob_names = sorted(map(os.path.basename, glob.glob(foldername + '/*')))
+    clipnames = tqdm(glob_names, unit="clip")  # sort clip names by file name
+    print(list(glob_names))
     clips = []
     for clipname in clipnames:
         clipnames.message = "Merging " + clipname
-        clip = VideoFileClip(foldername +"/" + clipname)
+        clip = VideoFileClip(foldername +'/'+ clipname)
         clip.resize(width=800)
         clips.append(clip)  # add to list of clips
 
